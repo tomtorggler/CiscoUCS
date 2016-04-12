@@ -63,15 +63,15 @@
         $outDataFabricA += "! Zones"
         foreach ($item in $ServieProfileInfos) {
             $outDataFabricA += "zone name $($item.Name)-vHba-A_$target vsan $vsan"
-            $outDataFabricA += " member $Target"
-            $outDataFabricA += " member $($item.Name)-vHba-A"
+            $outDataFabricA += " member device-alias $Target"
+            $outDataFabricA += " member device-alias $($item.Name)-vHba-A"
         }
         $outDataFabricA += "! Zoneset"
         $outDataFabricA += "zoneset name $ZoneSet vsan $vsan"
         foreach ($item in $ServieProfileInfos) {
             $outDataFabricA += " member $($item.Name)-vHba-A_$target"
         }
-        $outDataFabricB += "zoneset activate name $zoneset vsan $vsan"
+        $outDataFabricA += "! zoneset activate name $zoneset vsan $vsan"
 
         $outDataFabricB = @()
         $outDataFabricB += "! Fabric B"
@@ -83,15 +83,15 @@
         $outDataFabricB += "! Zones"
         foreach ($item in $ServieProfileInfos) {
             $outDataFabricB += "zone name $($item.Name)-vHba-B_$target vsan $vsan"
-            $outDataFabricB += " member $Target"
-            $outDataFabricB += " member $($item.Name)-vHba-B"
+            $outDataFabricB += " member device-alias $Target"
+            $outDataFabricB += " member device-alias $($item.Name)-vHba-B"
         }
         $outDataFabricB += "! Zoneset"
         $outDataFabricB += "zoneset name $ZoneSet vsan $vsan"
         foreach ($item in $ServieProfileInfos) {
             $outDataFabricB += " member $($item.Name)-vHba-B_$target"
         }
-        $outDataFabricB += "zoneset activate name $zoneset vsan $vsan"
+        $outDataFabricB += "! zoneset activate name $zoneset vsan $vsan"
 
         # write the thing to the pipeline or a textfile 
         switch ($Fabric)
