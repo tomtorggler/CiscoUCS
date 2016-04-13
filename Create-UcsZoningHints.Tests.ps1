@@ -54,32 +54,55 @@ Describe "Testing Create-UcsZoningHints" {
         }
     }
     Context "Testing Output" {
-        It "Test output to pipeline" {
-            $output = Get-UcsServiceProfile | Create-UcsZoningHints
-            (-join $output) | Should Match "! Fabric A.*! Fabric B.*"
-            $output | select -Last 1 | Should Match "! zoneset"
-        } 
         It "Test output to pipeline for Fabric A" {
-            $output = Get-UcsServiceProfile | Create-UcsZoningHints -Fabric A -ZoneSet $ZoneSet -Target $Target -vsan $vsan
+            $output = Get-UcsServiceProfile | Create-UcsZoningHints -Fabric A
             $output | select -First 1 | Should Match "! Fabric A.*"
             $output | select -First 1 | Should Not Match "! Fabric B.*"
+            $output | select -ExpandProperty CommandLine | select -Last 1 | Should Match "! zoneset"
         }
         It "Test output to pipeline for Fabric B" {
             $output = Get-UcsServiceProfile | Create-UcsZoningHints -Fabric B
             $output | select -First 1 | Should Match "! Fabric B.*"
             $output | select -First 1 | Should Not Match "! Fabric A.*"
+            $output | select -ExpandProperty CommandLine | select -Last 1 | Should Match "! zoneset"
         }
-        It "Test output to pipeline with parameters" {
-            $output = Get-UcsServiceProfile | Create-UcsZoningHints -Fabric Both -ZoneSet $ZoneSet -Target $Target -vsan $vsan
-            (-join $output) | Should Match "! Fabric A.*! Fabric B.*"
-            $output | select -First 1 -Skip 1 | Should Match "device-alias database"
-            $output | select -Last 1 | Should Match "! zoneset activate name $ZoneSet vsan $vsan$"
+        It "Test output to pipeline for Fabric A with Parameters" {
+            $output = Get-UcsServiceProfile | Create-UcsZoningHints -Fabric A -ZoneSet $ZoneSet -Target $Target -vsan $vsan
+            $output | select -First 1 | Should Match "! Fabric A.*"
+            $output | select -First 1 | Should Not Match "! Fabric B.*"
+            $output | select -ExpandProperty CommandLine | select -Last 1 | Should Match "! zoneset activate name $ZoneSet vsan $vsan"
         }
-        It "Test output to file" {
+        It "Test output to pipeline for Fabric B with Parameters" {
+            $output = Get-UcsServiceProfile | Create-UcsZoningHints -Fabric B -ZoneSet $ZoneSet -Target $Target -vsan $vsan
+            $output | select -First 1 | Should Match "! Fabric B.*"
+            $output | select -First 1 | Should Not Match "! Fabric A.*"
+            $output | select -ExpandProperty CommandLine | select -Last 1 | Should Match "! zoneset activate name $ZoneSet vsan $vsan"
+        }
+        It "Test output to file for Fabric A" {
             $OutFile = Join-Path -Path $TestDrive -ChildPath "out.txt"
             Get-UcsServiceProfile | Create-UcsZoningHints -OutFile $OutFile
             $output = Get-Content -Path $OutFile
-            (-join $output) | Should Match "! Fabric A.*! Fabric B.*"
+            (-join $output) | Should Match "! Fabric A.*"
+        }
+        It "Test output to file for Fabric B" {
+            $OutFile = Join-Path -Path $TestDrive -ChildPath "out.txt"
+            Get-UcsServiceProfile | Create-UcsZoningHints -Fabric B -OutFile $OutFile
+            $output = Get-Content -Path $OutFile
+            (-join $output) | Should Match "! Fabric B.*"
+        }
+        It "Test output to file for Fabric A with Parameters " {
+            $OutFile = Join-Path -Path $TestDrive -ChildPath "out.txt"
+            Get-UcsServiceProfile | Create-UcsZoningHints -ZoneSet $ZoneSet -Target $Target -vsan $vsan -OutFile $OutFile
+            $output = Get-Content -Path $OutFile
+            (-join $output) | Should Match "^! Fabric A.*"
+            (-join $output) | Should Match ".*zoneset activate name $ZoneSet vsan $vsan"
+        }
+        It "Test output to file for Fabric B with Parameters " {
+            $OutFile = Join-Path -Path $TestDrive -ChildPath "out.txt"
+            Get-UcsServiceProfile | Create-UcsZoningHints -Fabric B -ZoneSet $ZoneSet -Target $Target -vsan $vsan -OutFile $OutFile
+            $output = Get-Content -Path $OutFile
+            (-join $output) | Should Match "^! Fabric B.*"
+            (-join $output) | Should Match ".*zoneset activate name $ZoneSet vsan $vsan"
         }
     }
 }

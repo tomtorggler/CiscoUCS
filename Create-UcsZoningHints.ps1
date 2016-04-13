@@ -25,10 +25,10 @@
         [string]
         $ZoneSet = "myZoneSet",
 
-        # Specify for which Fabric the output should be generated, default is Both
-        [ValidateSet('A','B','Both')]
+        # Specify for which Fabric the output should be generated, default is A
+        [ValidateSet('A','B')]
         [string]
-        $Fabric = "Both",
+        $Fabric = 'A',
 
         # Specify an output file, default is none.
         [System.IO.FileInfo]
@@ -77,7 +77,7 @@
         $outDataFabricB += "! Fabric B"
         $outDataFabricB += "device-alias database"
         foreach ($item in $ServieProfileInfos) {
-            $outDataFabricB += "device-alias name $($item.Name)-vHba-B pwwn $($item.'vhba-b')"
+            $outDataFabricB += " device-alias name $($item.Name)-vHba-B pwwn $($item.'vhba-b')"
         }
         $outDataFabricB += "device-alias commit"
         $outDataFabricB += "! Zones"
@@ -98,17 +98,32 @@
         {
             'A' {
                 if ($OutFile) {$outDataFabricA | Tee-Object -FilePath $OutFile}
-                else {$outDataFabricA}
+                else {
+                    for ($i = 0; $i -lt $outDataFabricA.Length; $i++)
+                    { 
+                        Write-Verbose "i $i"
+                        $data = [ordered]@{
+                            'Id' = $i
+                            'CommandLine' = $outDataFabricA[$i]
+                        } 
+                        Write-Output -InputObject (New-Object -TypeName PSCustomObject -Property $data)
+                    }
+                        
+                }
             }
             'B' {
                 if ($OutFile) {$outDataFabricB | Tee-Object -FilePath $OutFile}
-                else {$outDataFabricB}
-            }
-            'Both' {
-                if ($OutFile) {
-                    $outDataFabricA | Tee-Object -FilePath $OutFile
-                    $outDataFabricB | Tee-Object -FilePath $OutFile -Append
-                } else {$outDataFabricA;$outDataFabricB}
+                else {
+                for ($i = 0; $i -lt $outDataFabricB.Length; $i++)
+                    { 
+                        Write-Verbose "i $i"
+                        $data = [ordered]@{
+                            'Id' = $i
+                            'CommandLine' = $outDataFabricB[$i]
+                        } 
+                        Write-Output -InputObject (New-Object -TypeName PSCustomObject -Property $data)
+                    }
+                }
             }
         }
     }
